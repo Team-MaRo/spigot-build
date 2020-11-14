@@ -1,0 +1,7 @@
+# Add 'repo' label to any root file changes
+repo:
+  - ./*
+
+# Add 'source' label to any change to files related to building
+source:
+  - .github/workflows/ci-cd.yml

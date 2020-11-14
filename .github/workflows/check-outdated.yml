@@ -1,0 +1,73 @@
+name: Check outdated builds
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Every hour
+
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest version
+        id: prep
+        run: |
+          echo "::set-output name=latestSpigotVersion::$(
+              curl -s https://hub.spigotmc.org/versions/ |
+              grep -E "*[0-9]\.[0-9]{1,2}(\.[0-9]){0,}?(-pre[0-9]){0,}" -o |
+              uniq |
+              sed 's/\.$//' |
+              sed 's/-pre/~pre/' |
+              sort --version-sort |
+              sed 's/~pre/-pre/' |
+              tail -n 1
+          )"
+
+      - name: Download builds
+        continue-on-error: true
+        id: download
+        run: |
+          curl -fsSL -o spigot.jar https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.latestSpigotVersion }}/spigot.jar
+          if (( 0 != $? )); then
+              echo "::set-output name=exists::0"
+          else
+              echo "::set-output name=exists::1"
+          fi
+
+      - name: Test build
+        if: steps.download.outputs.exists == '1'
+        run: |
+          true >output.txt
+
+          ( java -Xms1G -Xmx4G -jar spigot.jar 2>&1 | tee output.txt ) &
+          PID=$!
+          sleep 1
+
+          # https://superuser.com/questions/153735/kill-process-after-its-been-allowed-to-run-for-some-time
+          # https://unix.stackexchange.com/questions/336894/kill-the-parent-of-a-child-pipe-process
+          kill -- -$PID 2>/dev/null &
+          wait $PID
+
+          # https://stackoverflow.com/questions/11287861/how-to-check-if-a-file-contains-a-specific-string-using-bash
+          if grep -q outdated output.txt; then
+              curl \
+                  --silent \
+                  --request POST \
+                  --header "Authorization: Bearer ${{ secrets.PAT }}" \
+                  --header "Accept: application/vnd.github.v3+json" \
+                  --url https://api.github.com/repos/${{ github.repository }}/actions/workflows/ci-cd.yml/dispatches \
+                  --data "{\"ref\":\"refs/heads/master\",\"inputs\":{\"version\":\"${{ steps.prep.outputs.latestSpigotVersion }}\"}}"
+          fi
+
+      - name: Create build
+        if: steps.download.outputs.exists != '1'
+        run: |
+          curl \
+              --silent \
+              --request POST \
+              --header "Authorization: Bearer ${{ secrets.PAT }}" \
+              --header "Accept: application/vnd.github.v3+json" \
+              --url https://api.github.com/repos/${{ github.repository }}/actions/workflows/ci-cd.yml/dispatches \
+              --data "{\"ref\":\"refs/heads/master\",\"inputs\":{\"version\":\"${{ steps.prep.outputs.latestSpigotVersion }}\"}}"
