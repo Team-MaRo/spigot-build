@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+    paths: ['.github/scripts/**', 'jdk-boundaries.json']
+  pull_request:
+    paths: ['.github/scripts/**', 'jdk-boundaries.json']
+
+permissions:
+  contents: read
+
+jobs:
+  matrix-script:
+    runs-on: ubuntu-latest
+    name: matrix.ts unit tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Run tests
+        run: npx -y tsx --test .github/scripts/matrix.test.ts

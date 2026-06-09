@@ -1,7 +1,30 @@
-# Add 'repo' label to any root file changes
-repo:
-  - ./*
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
 
-# Add 'source' label to any change to files related to building
-source:
-  - .github/workflows/ci-cd.yml
+feature:
+  - head-branch: ['^feature', 'feature']
+
+release:
+  - all:
+    - base-branch: 'master'
+    - head-branch: ['^release', 'release']
+
+nix:
+  - changed-files:
+    - any-glob-to-any-file:
+        - 'flake.nix'
+        - 'flake.lock'
+        - 'versions.json'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+        - '.github/workflows/**'
+        - '.github/scripts/**'
+        - '.github/dependabot.yml'
+        - '.github/labeler.yml'
+
+java:
+  - changed-files:
+    - any-glob-to-any-file: '.github/check-outdated/**'

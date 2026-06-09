@@ -1,0 +1,72 @@
+name: Bump BuildTools pin
+
+# Keeps the BuildTools build pinned in flake.nix (`buildToolsBuild` +
+# `buildToolsHash`, used by `lib.buildSpigot`) current. SpigotMC's
+# `lastSuccessfulBuild` advances on its own, so this probes it on a schedule and,
+# if it's newer than the pin, fetches that build's hash and commits the bump.
+# (The CI build-jars job uses `lastSuccessfulBuild` directly, so it always builds
+# the released jars with the latest BuildTools regardless of this pin.)
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Mondays 09:00 UTC (before the 09:30 build/check)
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit the flake.nix bump
+
+concurrency:
+  group: bump-buildtools-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    # Skip pushes the workflow itself created, otherwise we'd loop.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump BuildTools pin
+        run: |
+          set -euo pipefail
+          latest="$(curl -fsSL https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json | jq -r .number)"
+          current="$(grep -oP 'buildToolsBuild = "\K[0-9]+' flake.nix)"
+          echo "pinned=$current latest=$latest"
+          if [ -z "$latest" ] || [ "$latest" = "null" ]; then
+            echo "::error::could not resolve lastSuccessfulBuild number"; exit 1
+          fi
+          if [ "$latest" = "$current" ]; then
+            echo "already pinned to the latest build ($current)"; exit 0
+          fi
+          hash="$(nix store prefetch-file --json \
+            "https://hub.spigotmc.org/jenkins/job/BuildTools/${latest}/artifact/target/BuildTools.jar" | jq -r .hash)"
+          echo "new hash: $hash"
+          sed -i -E "s|buildToolsBuild = \"[0-9]+\"|buildToolsBuild = \"${latest}\"|" flake.nix
+          sed -i -E "s|buildToolsHash = \"sha256-[^\"]+\"|buildToolsHash = \"${hash}\"|" flake.nix
+
+      - name: Commit + push if changed
+        env:
+          BUILD_MSG: 'chore: bump BuildTools pin'
+        run: |
+          set -euo pipefail
+          if git diff --quiet flake.nix; then
+            echo "flake.nix unchanged; nothing to commit."
+            exit 0
+          fi
+          git add flake.nix
+          git commit -m "$BUILD_MSG"
+          git push origin "HEAD:${GITHUB_REF#refs/heads/}"

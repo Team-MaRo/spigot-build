@@ -1,73 +1,117 @@
-name: Check outdated builds
+name: Check outdated jars
 
+# Weekly watchdog over the newest buildable version's jar. The weekly build keeps
+# jars fresh, but a build succeeding doesn't prove the jar actually boots or isn't
+# reporting itself outdated. This downloads the released spigot.jar and runs it
+# through a real startup; if the release is missing, the jar is broken, or Spigot
+# prints the "outdated" banner, it dispatches build.yml to rebuild that version.
 on:
   schedule:
-    - cron: "0 * * * *" # Every hour
+    - cron: '30 9 * * 1' # Mondays 09:30 UTC
 
   workflow_dispatch:
+
+permissions:
+  contents: read # read releases
+  actions: write # dispatch build.yml
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    name: Check newest jar
 
     steps:
-      - name: Get latest version
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      # Newest buildable version + the JDK it needs (matrix.ts returns e.g.
+      # [{"spigot":"26.1.2","java":"25"}]).
+      - name: Resolve newest version
         id: prep
         run: |
-          echo "::set-output name=latestSpigotVersion::$(
-              curl -s https://hub.spigotmc.org/versions/ |
-              grep -E "*[0-9]\.[0-9]{1,2}(\.[0-9]){0,}?(-pre[0-9]){0,}" -o |
-              uniq |
-              sed 's/\.$//' |
-              sed 's/-pre/~pre/' |
-              sort --version-sort |
-              sed 's/~pre/-pre/' |
-              tail -n 1
-          )"
+          set -euo pipefail
+          entry="$(npx -y tsx .github/scripts/matrix.ts --version latest)"
+          echo "version=$(printf '%s' "$entry" | jq -r '.[0].spigot // ""')" >> "$GITHUB_OUTPUT"
+          echo "java=$(printf '%s' "$entry" | jq -r '.[0].java // ""')" >> "$GITHUB_OUTPUT"
 
-      - name: Download builds
-        continue-on-error: true
-        id: download
+      # Does a release with a spigot.jar asset already exist for that version?
+      - name: Check release exists
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -fsSL -o spigot.jar https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.latestSpigotVersion }}/spigot.jar
-          if (( 0 != $? )); then
-              echo "::set-output name=exists::0"
+          set -euo pipefail
+          if gh release view "${{ steps.prep.outputs.version }}" --json assets \
+               --jq '.assets[].name' 2>/dev/null | grep -qx 'spigot.jar'; then
+            echo "exists=1" >> "$GITHUB_OUTPUT"
           else
-              echo "::set-output name=exists::1"
+            echo "exists=0" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Test build
-        if: steps.download.outputs.exists == '1'
+      - name: Set up JDK
+        if: steps.release.outputs.exists == '1'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ steps.prep.outputs.java }}
+
+      # Build the StopOnStart plugin against the release jar (which bundles the
+      # Bukkit API). --release 8 keeps the bytecode loadable by any server JVM.
+      - name: Download jar and build plugin
+        if: steps.release.outputs.exists == '1'
         run: |
-          true >output.txt
+          set -euo pipefail
+          curl -fsSL -o spigot.jar \
+            "https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.version }}/spigot.jar"
+          javac --release 8 -cp spigot.jar -d plugin-build .github/check-outdated/StopOnStart.java
+          cp .github/check-outdated/plugin.yml plugin-build/
+          jar cf StopOnStart.jar -C plugin-build .
 
-          ( java -Xms1G -Xmx4G -jar spigot.jar 2>&1 | tee output.txt ) &
-          PID=$!
-          sleep 1
+      # Boot the jar through a real startup (EULA accepted) with the StopOnStart
+      # plugin, so we verify it actually works — not just that it avoids the
+      # "outdated" banner. The plugin shuts the server down as soon as it finishes
+      # starting; the timeout is only a safety cap. Two signals:
+      #   outdated=1 -> Spigot reported the build outdated
+      #   started=0  -> the server never reached the plugin (the jar is broken)
+      - name: Detect outdated / broken jar
+        id: jar
+        if: steps.release.outputs.exists == '1'
+        run: |
+          set -euo pipefail
+          mkdir -p plugins
+          cp StopOnStart.jar plugins/
+          echo "eula=true" > eula.txt
+          # Skip Nether/End (both load during startup, before onEnable). In modern
+          # Spigot these are bukkit.yml settings.
+          yq -n '.settings.allow-nether = false | .settings.allow-end = false' > bukkit.yml
 
-          # https://superuser.com/questions/153735/kill-process-after-its-been-allowed-to-run-for-some-time
-          # https://unix.stackexchange.com/questions/336894/kill-the-parent-of-a-child-pipe-process
-          kill -- -$PID 2>/dev/null &
-          wait $PID
-
-          # https://stackoverflow.com/questions/11287861/how-to-check-if-a-file-contains-a-specific-string-using-bash
-          if grep -q outdated output.txt; then
-              curl \
-                  --silent \
-                  --request POST \
-                  --header "Authorization: Bearer ${{ secrets.PAT }}" \
-                  --header "Accept: application/vnd.github.v3+json" \
-                  --url https://api.github.com/repos/${{ github.repository }}/actions/workflows/ci-cd.yml/dispatches \
-                  --data "{\"ref\":\"refs/heads/master\",\"inputs\":{\"version\":\"${{ steps.prep.outputs.latestSpigotVersion }}\"}}"
+          code=0
+          timeout -k 15 60 java -Xmx2G -jar spigot.jar nogui > jar.log 2>&1 || code=$?
+          if [ "$code" -eq 124 ] || [ "$code" -eq 137 ]; then
+            echo "::error::spigot.jar for ${{ steps.prep.outputs.version }} did not stop within the timeout — it hangs on startup"
+            cat jar.log || true
+            exit 1
           fi
 
-      - name: Create build
-        if: steps.download.outputs.exists != '1'
+          grep -qi 'outdated' jar.log && echo "outdated=1" >> "$GITHUB_OUTPUT" || echo "outdated=0" >> "$GITHUB_OUTPUT"
+          grep -q 'StopOnStart: server started' jar.log && echo "started=1" >> "$GITHUB_OUTPUT" || echo "started=0" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger rebuild
+        if: |
+          steps.release.outputs.exists != '1' ||
+          steps.jar.outputs.outdated == '1' ||
+          steps.jar.outputs.started == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl \
-              --silent \
-              --request POST \
-              --header "Authorization: Bearer ${{ secrets.PAT }}" \
-              --header "Accept: application/vnd.github.v3+json" \
-              --url https://api.github.com/repos/${{ github.repository }}/actions/workflows/ci-cd.yml/dispatches \
-              --data "{\"ref\":\"refs/heads/master\",\"inputs\":{\"version\":\"${{ steps.prep.outputs.latestSpigotVersion }}\"}}"
+          set -euo pipefail
+          echo "Rebuild needed for ${{ steps.prep.outputs.version }}:"
+          echo "  release missing: $([ '${{ steps.release.outputs.exists }}' != '1' ] && echo yes || echo no)"
+          echo "  jar outdated:    ${{ steps.jar.outputs.outdated || 'n/a' }}"
+          echo "  jar started:     ${{ steps.jar.outputs.started || 'n/a' }}"
+          gh workflow run build.yml --ref master -f version="${{ steps.prep.outputs.version }}"

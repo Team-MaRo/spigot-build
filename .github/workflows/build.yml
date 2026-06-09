@@ -1,0 +1,379 @@
+name: Build & release jars
+
+on:
+  # Pick up new Minecraft versions automatically and rebuild the newest ones.
+  schedule:
+    - cron: '30 9 * * 1' # Mondays 09:30 UTC
+
+  # Manual builds.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versions to build: 'latest', 'all', 'missing', or a specific version (e.g. 1.20.4)"
+        required: true
+        default: "latest"
+      newest_n:
+        description: "In 'missing' mode, how many newest versions to always rebuild"
+        required: false
+        default: "2"
+
+  # On PRs, build the latest version as a smoke test (never released).
+  pull_request:
+
+# Releases write tags/assets and the record-hashes job commits versions.json.
+permissions:
+  contents: write
+
+concurrency:
+  group: jars-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Decide which versions to compile. Each matrix entry is {spigot, java}. See
+  # .github/scripts/matrix.ts for the selection + JDK-mapping logic.
+  matrix:
+    runs-on: ubuntu-latest
+    name: Compute matrix
+    outputs:
+      jar_matrix: ${{ steps.compute.outputs.matrix }}
+      jar_count: ${{ steps.compute.outputs.count }}
+      latest: ${{ steps.compute.outputs.latest }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # Release tags target the orphan 'builds' branch (see build-jars). GitHub
+      # refuses to create a release whose target branch doesn't exist, so create
+      # it before the first release. Idempotent: an empty root commit that never
+      # touches master or HEAD.
+      - name: Ensure builds branch exists
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin builds >/dev/null 2>&1; then
+            echo "'builds' branch already exists"
+          else
+            echo "Creating orphan 'builds' branch"
+            tree="$(git hash-object -w -t tree /dev/null)"
+            commit="$(git commit-tree "$tree" -m 'chore: initialize builds branch')"
+            git push origin "$commit:refs/heads/builds"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Compute matrix
+        id: compute
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEWEST_N: ${{ github.event.inputs.newest_n || '3' }}
+        run: |
+          set -euo pipefail
+          event='${{ github.event_name }}'
+          input_version='${{ github.event.inputs.version }}'
+          case "$event" in
+            pull_request)      sel=latest ;;
+            schedule)          sel=missing ;;
+            workflow_dispatch) sel="${input_version:-missing}" ;;
+            *)                 sel=latest ;;
+          esac
+          matrix="$(npx -y tsx .github/scripts/matrix.ts --version "$sel")"
+          latest="$(npx -y tsx .github/scripts/matrix.ts --version latest | jq -r '.[0].spigot // ""')"
+          count="$(printf '%s' "$matrix" | jq 'length')"
+          {
+            echo "matrix=$matrix"
+            echo "count=$count"
+            echo "latest=$latest"
+          } >> "$GITHUB_OUTPUT"
+          echo "selected: $matrix"
+
+      # GitHub auto-disables scheduled workflows after 60 days with no repository
+      # activity. In a long quiet stretch (no new Minecraft versions → no
+      # versions.json commits) this schedule could be disabled. If master's tip is
+      # older than the threshold, push one empty commit to re-arm it. Schedule-only
+      # (a manual run is itself activity); GITHUB_TOKEN push won't loop-trigger.
+      - name: Keepalive (prevent workflow auto-disable)
+        if: always() && github.event_name == 'schedule'
+        env:
+          KEEPALIVE_THRESHOLD_DAYS: '50'
+        run: |
+          set -euo pipefail
+          last_epoch="$(git log -1 --pretty=%ct)"
+          age_days=$(( ( $(date +%s) - last_epoch ) / 86400 ))
+          if [ "$age_days" -lt "$KEEPALIVE_THRESHOLD_DAYS" ]; then
+            echo "last commit ${age_days}d ago (< ${KEEPALIVE_THRESHOLD_DAYS}d threshold) — no keepalive needed"
+            exit 0
+          fi
+          echo "last commit ${age_days}d ago — pushing keepalive commit"
+          git commit --allow-empty -m 'chore: keepalive'
+          git push origin HEAD:master
+
+  # Compile each selected version with the right JDK, normalize the jars so their
+  # bytes (and thus their hashes) are stable across rebuilds, and attach them to a
+  # release tagged with the Minecraft version (on the orphan 'builds' branch).
+  build-jars:
+    needs: matrix
+    if: needs.matrix.outputs.jar_count != '0'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.jar_matrix) }}
+    name: Build Spigot ${{ matrix.spigot }} (JDK ${{ matrix.java }})
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      # Cache ONLY the Maven dependency repo (~/.m2) — small (~100 MB), version-
+      # agnostic, and reused by every job. We deliberately do NOT cache the
+      # `buildtools/` work dir: it's 1.2–1.4 GB PER VERSION (decompiled output +
+      # git clones), so ~60 versions would blow the 10 GB cache cap and thrash.
+      # It also gives no benefit on a `version=all` run — each version builds
+      # exactly once, so its entry is only ever saved, never restored.
+      #
+      # Static key (no restore-keys): the usual hashFiles('**/pom.xml') trigger
+      # doesn't apply — no POMs are committed; BuildTools clones them at build
+      # time, after this key is evaluated. The deps a build pulls are stable, so
+      # one shared entry suffices. Seed it with a `version=all` run; bump the
+      # suffix to force a refresh if deps ever go stale.
+      - name: Cache Maven
+        uses: actions/cache@v5
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-v1
+
+      # Some old versions' spigot-api POM lists no usable dependency repo for
+      # net.md-5:bungeecord-chat:*-SNAPSHOT (only the dead oss.sonatype.org), so a
+      # cold build can't resolve it. Point Maven at SpigotMC's live public group repo
+      # — but ONLY for the tagged jobs (matrix.snapshotRepo), so every other version's
+      # dependency resolution, and thus its published-jar hash, is left untouched.
+      - name: Configure Maven (live SpigotMC repo for snapshot deps)
+        if: ${{ matrix.snapshotRepo }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'EOF'
+          <settings>
+            <profiles>
+              <profile>
+                <id>spigotmc</id>
+                <repositories>
+                  <repository>
+                    <id>spigotmc-public</id>
+                    <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+            <activeProfiles><activeProfile>spigotmc</activeProfile></activeProfiles>
+          </settings>
+          EOF
+
+      - name: Build with BuildTools
+        run: |
+          set -euo pipefail
+          mkdir -p buildtools dist
+          cd buildtools
+          curl -fsSL -o BuildTools.jar \
+            https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+          # --compile replaces the default (SPIGOT), so list both to get both jars.
+          java -Xmx4G -jar BuildTools.jar --rev "${{ matrix.spigot }}" --compile spigot,craftbukkit -o "$GITHUB_WORKSPACE/dist"
+
+      - name: Verify built version
+        run: |
+          set -euo pipefail
+          ver="${{ matrix.spigot }}"
+          # Guard against BuildTools producing a different rev than requested (the
+          # cause of the old cross-version cache bug). The version token in each
+          # output filename must equal "$ver" EXACTLY — bounded by ".jar" or "-" —
+          # so 1.21.2 never accepts a 1.21 / 1.21.10 jar, nor 1.21 a 1.21.2 jar.
+          assert_version() {
+            local label="$1" path rest
+            path="$(find dist -maxdepth 1 -iname "${label}-*.jar" ! -iname 'spigot-api-*.jar' | head -n 1 || true)"
+            [ -n "$path" ] || { echo "::error::no ${label} jar produced for ${ver}"; exit 1; }
+            rest="${path##*/}"; rest="${rest#"${label}"-}"
+            case "$rest" in
+              "$ver".jar|"$ver"-*) echo "OK: ${label} = ${path##*/}" ;;
+              *) echo "::error::${label} jar is '${path##*/}', expected version ${ver}"; exit 1 ;;
+            esac
+          }
+          assert_version spigot
+          assert_version craftbukkit
+
+      - name: Collect artifacts
+        run: |
+          set -euo pipefail
+          spigot="$(find dist -maxdepth 1 -iname 'spigot-*.jar' ! -iname 'spigot-api-*.jar' | head -n 1)"
+          craftbukkit="$(find dist -maxdepth 1 -iname 'craftbukkit-*.jar' | head -n 1)"
+          # Grab the API jar from THIS build's own output (not a version-globbed
+          # ~/.m2 search) — robust even if Spigot's API version string lags the MC
+          # patch. The plain jar (not the -shaded one) carries the Bukkit API.
+          api="$(find buildtools/Spigot/Spigot-API/target -maxdepth 1 -iname 'spigot-api-*.jar' \
+            ! -iname '*-shaded*' 2>/dev/null | grep -viE 'sources|javadoc' | head -n 1 || true)"
+          [ -n "$spigot" ] && mv "$spigot" dist/spigot.jar
+          [ -n "$craftbukkit" ] && mv "$craftbukkit" dist/craftbukkit.jar
+          [ -n "$api" ] && cp "$api" dist/spigot-api.jar || echo "WARNING: no spigot-api jar found"
+          ls -l dist
+
+      # Strip jar/zip timestamps so a rebuild of unchanged sources yields byte-
+      # identical jars (stable sha256). Without this, every rebuild would churn
+      # the hash that consumers pin.
+      - name: Normalize jars (stable hashes)
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends strip-nondeterminism
+          for jar in dist/*.jar; do strip-nondeterminism "$jar"; done
+
+      # Record each published jar's SRI sha256 for the flake to pin. Aggregated +
+      # committed by the record-hashes job (a single job, to avoid races).
+      - name: Compute jar hashes
+        run: |
+          set -euo pipefail
+          sri() { printf 'sha256-%s' "$(openssl dgst -sha256 -binary "$1" | base64 -w0)"; }
+          out='{}'
+          for which in spigot:spigot.jar craftbukkit:craftbukkit.jar spigotApi:spigot-api.jar; do
+            key="${which%%:*}"; file="dist/${which##*:}"
+            [ -f "$file" ] || continue
+            out="$(jq -nc --argjson cur "$out" --arg k "$key" --arg v "$(sri "$file")" '$cur + {($k): $v}')"
+          done
+          mkdir -p hashes
+          # Self-describing record: { "<version>": {…} }, so the record-hashes job
+          # merges by content and doesn't depend on the downloaded artifact's
+          # directory name/layout.
+          jq -nc --arg v "${{ matrix.spigot }}" --argjson o "$out" '{ ($v): $o }' > hashes/hash.json
+          cat hashes/hash.json
+
+      - name: Upload jar artifacts (workflow)
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-${{ matrix.spigot }}
+          path: dist/*.jar
+          if-no-files-found: error
+
+      - name: Upload hash record
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: hash-${{ matrix.spigot }}
+          path: hashes/hash.json
+          if-no-files-found: error
+
+  # Publish releases in a SINGLE sequential job (not per-matrix-job) so they are
+  # created in version order — newest last — giving an ascending publish time, which
+  # is what GitHub sorts the releases page by (mobile included). A parallel per-job
+  # release scrambles that order. Authored by github-actions[bot] via github.token,
+  # matching the existing releases. Updates in place if a release already exists, so
+  # the existing ones keep their original created_at.
+  publish:
+    needs: [matrix, build-jars]
+    # Run even if some versions failed — publish the ones that produced jars (a
+    # missing build-<v> artifact just makes that version's upload a no-op).
+    if: github.event_name != 'pull_request' && needs.matrix.outputs.jar_count != '0' && !cancelled()
+    runs-on: ubuntu-latest
+    name: Publish releases (in order)
+    steps:
+      - name: Download built jars
+        uses: actions/download-artifact@v8
+        with:
+          pattern: build-*
+          path: jars
+
+      - name: Create/update releases in version order
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          MATRIX: ${{ needs.matrix.outputs.jar_matrix }}
+        run: |
+          set -uo pipefail
+          manifest="$(curl -fsSL https://launchermeta.mojang.com/mc/game/version_manifest_v2.json)"
+          # matrix.outputs.jar_matrix is already sorted ascending by matrix.ts, so
+          # iterating it in order yields oldest-first creation (newest published last).
+          echo "$MATRIX" | jq -c '.[]' | while read -r e; do
+            v="$(jq -r '.spigot' <<<"$e")"; jdk="$(jq -r '.java' <<<"$e")"
+            date="$(jq -r --arg v "$v" '.versions[] | select(.id == $v) | .releaseTime' <<<"$manifest" | head -n1)"
+            date="${date%%T*}"
+            body="Spigot, CraftBukkit and Spigot-API jars for Minecraft ${v} (built with JDK ${jdk})."
+            [ -n "$date" ] && body="${body}"$'\n\n'"Minecraft ${v} was released on ${date}."
+            if gh release view "$v" >/dev/null 2>&1; then
+              gh release edit "$v" --title "v${v}" --notes "$body"
+              gh release upload "$v" jars/build-"$v"/*.jar --clobber
+              echo "updated v${v}"
+            else
+              gh release create "$v" --target builds --title "v${v}" --notes "$body" jars/build-"$v"/*.jar
+              echo "created v${v}"
+            fi
+          done
+
+  # Aggregate the per-version hash records into versions.json and commit it to
+  # master (single job → no concurrent-write race). This is what keeps the flake's
+  # pinned hashes in sync; consumers then pick them up via `nix flake update`.
+  record-hashes:
+    needs: [matrix, build-jars]
+    # Run as long as the build wasn't cancelled — even if SOME versions failed, we
+    # still want to record the hashes of the ones that succeeded (the merge is
+    # additive). A single bad version must not block recording all the good ones.
+    if: github.event_name != 'pull_request' && needs.matrix.outputs.jar_count != '0' && !cancelled()
+    runs-on: ubuntu-latest
+    name: Record jar hashes
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Download hash records
+        uses: actions/download-artifact@v8
+        with:
+          pattern: hash-*
+          path: hashes
+
+      - name: Merge into versions.json
+        run: |
+          set -euo pipefail
+          echo "downloaded artifact tree:"; find hashes -type f 2>/dev/null || true
+          mapfile -t records < <(find hashes -type f -name hash.json 2>/dev/null)
+          if [ "${#records[@]}" -eq 0 ]; then
+            echo "::error::no hash.json records found under hashes/ — did the build-jars jobs upload hash-* artifacts?"
+            exit 1
+          fi
+          # Deep-merge existing versions.json with every per-version record (later
+          # wins), then pretty-print sorted newest → oldest by semver. Strip any
+          # "-preN"/"-rcN" suffix before the numeric sort so pre-release keys don't
+          # break tonumber (they group next to their release).
+          jq -s 'reduce .[] as $o ({}; . * $o)
+                 | to_entries | sort_by(.key | split("-")[0] | split(".") | map(tonumber)) | reverse | from_entries' \
+            versions.json "${records[@]}" > versions.json.tmp
+          mv versions.json.tmp versions.json
+          cat versions.json
+
+      - name: Commit if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- versions.json; then
+            echo "versions.json unchanged"
+            exit 0
+          fi
+          git add versions.json
+          git commit -m "chore: update jar hashes"
+          git push origin HEAD:master

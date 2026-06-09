@@ -1,105 +1,119 @@
-# Spigot builder
+# spigot-build
 
-Only builds the spigot.jar
+Builds **Spigot** and **CraftBukkit** server jars with
+[BuildTools](https://www.spigotmc.org/wiki/buildtools/) and publishes a GitHub
+Release per Minecraft version — and exposes them as **hash-pinned Nix fetches** so
+other flakes can consume the finished jar without rebuilding.
 
-Project
+Spigot's licence forbids redistributing the compiled jar, so it is compiled here
+(per version) and distributed via this repo's Releases; the jars are never vendored
+into the source tree.
 
-[![License](https://img.shields.io/github/license/d3strukt0r/spigot-build)](LICENSE.md)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](.github/CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/github/license/Team-MaRo/spigot-build)](LICENSE.txt)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa)][code-of-conduct]
 
-main-branch (alias stable, latest)
+## How it works
 
-[![GH Action CI/CD](https://github.com/D3strukt0r/spigot-build/workflows/CI/CD/badge.svg?branch=main)][gh-action]
-<!--
-[![Codacy grade](https://img.shields.io/codacy/grade/{id}/main)][codacy]
--->
+- CI (`.github/workflows/build.yml`) discovers buildable versions from the
+  [SpigotMC hub](https://hub.spigotmc.org/versions/), builds each with the JDK it
+  needs, **normalizes the jars** (`strip-nondeterminism`, so a rebuild of
+  unchanged sources is byte-identical → stable hash), and publishes them to a
+  Release tagged with the Minecraft version (on an orphan `builds` branch).
+- A `record-hashes` job writes each published jar's SRI `sha256` into
+  [`versions.json`](versions.json) and commits it — the auto-maintained pin source.
+- `flake.nix` turns `versions.json` into hash-pinned `fetchurl` packages.
 
-<!--
-develop-branch (alias nightly)
+The matrix is minimal: a built version's jar never changes, so it builds versions
+with **no release yet** plus always rebuilds the **newest 3** (in case the latest
+got a late patch or a BuildTools fix). Runs weekly, on manual dispatch
+(`latest`/`all`/`missing`/a specific version), and on PRs (smoke build, never
+released).
 
-[![GH Action CI/CD](https://github.com/D3strukt0r/spigot-build/workflows/CI/CD/badge.svg?branch=develop)][gh-action]
-[![Codacy grade](https://img.shields.io/codacy/grade/{id}/develop)][codacy]
--->
+## Consuming the jars (from another flake)
 
-## Getting Started
+```nix
+{
+  inputs.spigot-build.url = "github:Team-MaRo/spigot-build";
+  outputs = { self, nixpkgs, spigot-build }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
+    in {
+      # Pinned fetch of the published jar (fast — no rebuild):
+      packages.${system}.jar = spigot-build.legacyPackages.${system}.spigotJar."26.1.2";
+      #   …also craftbukkitJar / spigotApiJar
+      #   spigot-build.lib.fetchSpigotJar { inherit pkgs; version = "26.1.2"; }
+      #   spigot-build.lib.jdkMajorFor "26.1.2"   # -> "25"
+      #   spigot-build.lib.versions               # released version list
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-* Java 8 (For Spigot <= 1.16.5)
-* Java 16+ (For Spigot >= 1.17)
-
-### Installing
-
-Download the Spigot version you want to from the [releases][gh-releases] page.
-
-In the same directory create a shell script to run Spigot (where # is your allocated server memory in GB):
-
-#### Windows (`start.bat`)
-
-```bat
-@echo off
-java -Xms#G -Xmx#G -XX:+UseG1GC -jar spigot.jar nogui
-pause
+      # Or build from source reproducibly (BuildTools FOD; supply a hash):
+      packages.${system}.fromSource = spigot-build.lib.buildSpigot {
+        inherit pkgs; version = "26.1.2"; hash = "sha256-…";
+      };
+    };
+}
 ```
 
-#### Linux (`start.sh`)
+Pick up new versions / rebuilt hashes with `nix flake update spigot-build`. This is
+how [docker-spigot](https://github.com/D3strukt0r/docker-spigot) consumes the jar
+(it bakes the pinned fetch into the image).
 
-```shell
-#!/bin/sh
-
-java -Xms#G -Xmx#G -XX:+UseG1GC -jar spigot.jar nogui
+```sh
+# Build a pinned jar directly:
+nix build '.#legacyPackages.x86_64-linux.spigotJar."26.1.2"'   # -> result (spigot.jar)
 ```
 
-and run `chmod a+x start.sh` to make it executable
+## JDK per Minecraft version
 
-#### Mac OS X (`start.sh`)
+| Spigot / Minecraft version | JDK |
+| -------------------------- | --- |
+| ≤ 1.16.5                   | 8   |
+| 1.17 – 1.17.1              | 16  |
+| 1.18 – 1.20.4              | 17  |
+| 1.20.5 – 1.21.11           | 21  |
+| ≥ 26.1 (year-based)        | 25  |
 
-```shell
-#!/bin/sh
-
-cd "$( dirname "$0" )"
-java -Xms#G -Xmx#G -XX:+UseG1GC -jar spigot.jar nogui
-```
-
-and run `chmod a+x start.sh` to make it executable
-
-For more detail check the official [Spigot Wiki](https://www.spigotmc.org/wiki/spigot/).
-
-## Built With
-
-* [Spigot](https://www.spigotmc.org/wiki/spigot/) - The main software
-* [Github Actions](https://github.com/features/actions) - CI (Testing) / CD (Deployment)
-* [Docker](https://www.docker.com) - Containerization
+Minecraft moved to year-based versioning after 1.21.11 (next release 26.1), which
+is why the newest jars build on JDK 25. The boundaries live in
+`.github/scripts/matrix.ts` (`JDK_BOUNDARIES`) and `flake.nix` (`jdkMajorFor`).
 
 ## Contributing
 
-Please read [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for details on our code of conduct, and [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md][contributing] for details on our code of conduct and the process for submitting pull requests.
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/).
 
 ## Versioning
 
-The is no project related versioning. The versions seen are the ones used for Minecraft. For changes see the [CHANGELOG.md](CHANGELOG.md) file. For the versions available, see the [tags on this repository][gh-tags].
+We use [SemVer](http://semver.org/) for versioning. For available versions, see the [tags on this repository][gh-tags].
 
 ## Authors
 
-All the authors can be seen in the [AUTHORS.md](.github/AUTHORS.md) file.
+### Special thanks for all the people who had helped this project so far
 
-Contributors can be seen in the [CONTRIBUTORS.md](.github/CONTRIBUTORS.md) file.
+- **Manuele** - [D3strukt0r](https://github.com/D3strukt0r)
 
 See also the full list of [contributors][gh-contributors] who participated in this project.
 
+### I would like to join this list. How can I help the project?
+
+We're currently looking for contributions for the following:
+
+- [ ] Bug fixes
+- [ ] Translations
+- [ ] etc...
+
+For more information, please refer to our [CONTRIBUTING.md][contributing] guide.
+
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
 
 ## Acknowledgments
 
-A list of used libraries and code with their licenses can be seen in the [ACKNOWLEDGMENTS.md](.github/ACKNOWLEDGMENTS.md) file.
+This project currently uses no third-party libraries or copied code.
 
-[gh-action]: https://github.com/D3strukt0r/spigot-build/actions
-[gh-releases]: https://github.com/D3strukt0r/spigot-build/releases
-[gh-tags]: https://github.com/D3strukt0r/spigot-build/tags
-[gh-contributors]: https://github.com/D3strukt0r/spigot-build/contributors
+[gh-tags]: https://github.com/Team-MaRo/spigot-build/tags
+[gh-contributors]: https://github.com/Team-MaRo/spigot-build/contributors
+[contributing]: https://github.com/Team-MaRo/.github/blob/master/CONTRIBUTING.md
+[code-of-conduct]: https://github.com/Team-MaRo/.github/blob/master/CODE_OF_CONDUCT.md

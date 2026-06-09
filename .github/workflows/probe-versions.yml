@@ -1,0 +1,133 @@
+name: Probe versions (diagnostic)
+
+# One-off / on-demand diagnostic: run BuildTools for EVERY version the SpigotMC hub
+# exposes (including the denylisted/aliased ones) and record, per version, what jar
+# it actually produces and whether it fails. Use the results to maintain the
+# UNBUILDABLE lists in .github/scripts/matrix.ts. Publishes nothing.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    name: Compute full matrix
+    outputs:
+      matrix: ${{ steps.compute.outputs.matrix }}
+      count: ${{ steps.compute.outputs.count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - name: Compute matrix (all versions, incl. unbuildable)
+        id: compute
+        run: |
+          set -euo pipefail
+          matrix="$(npx -y tsx .github/scripts/matrix.ts --version all --include-unbuildable)"
+          count="$(printf '%s' "$matrix" | jq 'length')"
+          {
+            echo "matrix=$matrix"
+            echo "count=$count"
+          } >> "$GITHUB_OUTPUT"
+          echo "probing $count versions"
+
+  probe:
+    needs: matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    name: Probe ${{ matrix.spigot }} (JDK ${{ matrix.java }})
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      # Each version builds in its own isolated runner (the "folder per version").
+      - name: Run BuildTools and record the result
+        run: |
+          set -uo pipefail
+          ver="${{ matrix.spigot }}"
+          mkdir -p work results && cd work
+          curl -fsSL -o BuildTools.jar \
+            https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+          # Mirror build.yml exactly. Capture status; do NOT abort on failure.
+          set +e
+          java -Xmx4G -jar BuildTools.jar --rev "$ver" --compile spigot,craftbukkit -o out > build.log 2>&1
+          status=$?
+          set -e
+          spigotjar="$(ls out/spigot-*.jar 2>/dev/null | grep -viE 'spigot-api|sources|javadoc' | head -n1 | xargs -r basename || true)"
+          cbjar="$(ls out/craftbukkit-*.jar 2>/dev/null | head -n1 | xargs -r basename || true)"
+          # Parse the actual built version out of the spigot jar filename.
+          built="${spigotjar#spigot-}"; built="${built%.jar}"
+          errtail=""
+          [ "$status" -ne 0 ] && errtail="$(tail -n 25 build.log | tr '\n' ' ' | tr -s ' ')"
+          jq -nc \
+            --arg req "$ver" --arg jdk "${{ matrix.java }}" --argjson status "$status" \
+            --arg spigotjar "$spigotjar" --arg cbjar "$cbjar" --arg built "$built" --arg err "$errtail" \
+            '{requested:$req, jdk:$jdk, status:$status,
+              spigotJar:$spigotjar, craftbukkitJar:$cbjar,
+              builtVersion:$built, alias:($built != "" and $built != $req),
+              error:$err}' > "$GITHUB_WORKSPACE/results/result.json"
+          echo "--- result for $ver ---"; cat "$GITHUB_WORKSPACE/results/result.json"
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-${{ matrix.spigot }}
+          path: results/result.json
+          if-no-files-found: warn
+
+  report:
+    needs: [matrix, probe]
+    if: always()
+    runs-on: ubuntu-latest
+    name: Aggregate report
+    steps:
+      - name: Download all results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: result-*
+          path: results
+      - name: Build report
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find results -type f -name result.json | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No results found." | tee "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          # Merge to a single sorted array (artifact for follow-up tooling).
+          jq -s 'sort_by(.requested | split(".") | map(tonumber? // 0))' "${files[@]}" > probe-results.json
+          {
+            echo "## BuildTools probe results"
+            echo
+            echo "| Requested | JDK | Built | Status | Alias? | Error (truncated) |"
+            echo "| --- | --- | --- | --- | --- | --- |"
+            jq -r '.[] |
+              "| \(.requested) | \(.jdk) | \(.builtVersion // "-") "
+              + "| \(if .status==0 then "✅" else "❌" end) "
+              + "| \(if .alias then "⚠️ " + .builtVersion else "" end) "
+              + "| \((.error // "")[0:120]) |"' probe-results.json
+            echo
+            echo "Totals: $(jq 'length' probe-results.json) probed, "
+            echo "$(jq '[.[]|select(.status!=0)]|length' probe-results.json) failed, "
+            echo "$(jq '[.[]|select(.alias)]|length' probe-results.json) aliased (built a different version)."
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat probe-results.json
+      - name: Upload merged results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: probe-results
+          path: probe-results.json
+          if-no-files-found: warn
