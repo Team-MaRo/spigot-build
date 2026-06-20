@@ -1,7 +1,7 @@
 {
   "26.2": {
-    "spigot": "sha256-5fsrRvpLXpADKJ3luMrZm6X+CoFUqRZvuKRc/7TTMh4=",
-    "craftbukkit": "sha256-pNtRTvrJgu1IBRfkWow2o8SjUdZ23zOiWFKcibuPN+g=",
+    "spigot": "sha256-nD84puJtO2/byNPja4Q0DrABdrqSvLlV/zU99DCD4FU=",
+    "craftbukkit": "sha256-EVK5IlsrMEyWJTrchZru8VRlFa8JUvbX9boLis/14kY=",
     "spigotApi": "sha256-ALUcFa4KM5YxQntyjJzYvvydfQjp7GfVetZ+aeBKKRA="
   },
   "26.1.2": {
@@ -40,89 +40,89 @@
     "spigotApi": "sha256-fMCyQlRgOs9eVRwg/DRMmNHKAoCAKA/8phjuZJMMejA="
   },
   "1.21.3": {
-    "spigot": "sha256-z1+xn9VEnhh20QukwinzKaaSjCEFoJgYEcmL9Hz+zxw=",
-    "craftbukkit": "sha256-HcZkaqUDl2fuS8YkZznUi2GEAstmTDRqhw5EGPH6EB4=",
+    "spigot": "sha256-AeYIuGP+6AANcojQ3bBHtoO5a8ImV4u4SLrkbbNuex0=",
+    "craftbukkit": "sha256-TgMiWx+MzJShwV8skawpHx6S5GduwovCifCd9bkwkFU=",
     "spigotApi": "sha256-8W5CGE6fAp3yesGNW55RJoVzdn5pB+N6Nw7DKOqynFI="
   },
   "1.21.1": {
-    "spigot": "sha256-ukNjlpyx+8LhSCfoZ45CUhlYwuw/yXDaX+Ad7SPv+HU=",
-    "craftbukkit": "sha256-S0FiX13AOJg6e1gOvo4JvcttHym6r+3wxYq0orQTJVQ=",
+    "spigot": "sha256-cq7Rol+C3XhR0/FokSbXVFzo5/e2q1OewkjW7YFrO+4=",
+    "craftbukkit": "sha256-xLSDEIe5aM8UppTlr4jqCpzjWG9MvuQu54qPOihxQ+A=",
     "spigotApi": "sha256-DWnjqSlUhTcXu63nQtCaQyshi4izkctc/7HZgBJee/w="
   },
   "1.20.6": {
-    "spigot": "sha256-Mst1UzpyFTdQxf3nAfIgswPTuJIpQse2tA25ws97abc=",
-    "craftbukkit": "sha256-RMm7vHJwSyV4oulgQ+yesNctyP18VlMVRWerwyBaq+8=",
+    "spigot": "sha256-NCnfoMf9ZBqYAGPQ4C2S9NIVj5xtLZQC4wbn47CgEao=",
+    "craftbukkit": "sha256-Rga+RqDQ3Zvnglw6JFrJTlDjhsZ6QJDlGHGu9KdEMqw=",
     "spigotApi": "sha256-XIidDkWLQ+jvQjUWl5Irg0gquGPBVY8fQWuSaQHdwDI="
   },
   "1.20.4": {
-    "spigot": "sha256-pDNJXZhgIc9uUiIr6KmhiPfVBo5M3NQC42vpc3jFtvU=",
-    "craftbukkit": "sha256-ze2Z6N/lLLfxEnDnlq8qdq5qElfSGGOc0LoeqdUz4OQ=",
+    "spigot": "sha256-N5bBwOhPfTJztQCZFrjszNlHJguI9FvwLKimaETeOpo=",
+    "craftbukkit": "sha256-9vOGFg6+zZKfQ650MJCu9SFTYeN8tEPA+HF48FDqLEw=",
     "spigotApi": "sha256-kEfoEuoPTAeWrF67nmEhu/cCZunpJl67VWbohAiCXaM="
   },
   "1.20.2": {
-    "spigot": "sha256-FHGcEwQsyiQJzdwmjtu9T+ZoS9NeXCga5lxsSvHVjZM=",
-    "craftbukkit": "sha256-gUVsdy5g5FawsUV16lypdZGxxEydPfu14xFck6mLDww=",
+    "spigot": "sha256-fTDA+Lr20cWYN+ZDuFCy1rRw/Xff6EIBvTdy6O/f/qM=",
+    "craftbukkit": "sha256-FUJFF181kEDC7vWUotjhQYK8YAtwKhKdfL2S8N77T7o=",
     "spigotApi": "sha256-BVnwf/O8K/Z1dQFlHoU6FFH6fxOp5Jw4B75YL0E4ZEw="
   },
   "1.20.1": {
-    "spigot": "sha256-o4/LuFM7KDu7Noa26zQSbBCwpf+Hp2i98K4/HulcJMQ=",
-    "craftbukkit": "sha256-FnF9NiLW9n1YMqDckE3Di+26od3ZnwB/cVd7FO+2fWE=",
+    "spigot": "sha256-pJgTmYpAnL7LVgiU5rWcOUa/Av40GjCTOyYY/q+M1TA=",
+    "craftbukkit": "sha256-nyPLaBOmiskf2h6SNKWyW9D8AVbyUze6iCWjQo1l5JM=",
     "spigotApi": "sha256-kJvt/SFU5HH9aKQLZ53tSJLCoOhyE3PksK67F2Rb95I="
   },
   "1.19.4": {
-    "spigot": "sha256-ZbstDlbRSWFUOEVaN1wO8DZ7e3Yd9NbNCBJdEkTiEhE=",
-    "craftbukkit": "sha256-rMLV19x29U2pNF8iq4Bk/yLHZoym9xM5BeXqgqfOIHY=",
+    "spigot": "sha256-LLSn9TdaiCo9EfmL3ZL+GZ5q7m/f45QricRzPXFaGU8=",
+    "craftbukkit": "sha256-s8XzZHfDqa2VJEKJYY5axtvqGkIia9ARYFZoVDnIKFI=",
     "spigotApi": "sha256-06V5ofEuQO+cUiwJikNX2s/olDuMDKtPT1vCrqUvSLk="
   },
   "1.19.3": {
-    "spigot": "sha256-CYPNgLipBg4hVsUEVsTNlfVCe95GzPhrx6fFlbC/J+c=",
-    "craftbukkit": "sha256-oLFJ5ZzRzyIjDXzGfNjwMva0OiuxxLoB6QHe8N5+vZY=",
+    "spigot": "sha256-r7rNE9QAQw1qhhhjapPaUerePC50dZcST1anPzkySkY=",
+    "craftbukkit": "sha256-2oyNI6HruDOAm5N7nRxILj7Nu/JqQhqp4SLvzveZlE8=",
     "spigotApi": "sha256-iZZ6o1MozyxSJrJ69FytrMnlJMD9FOpn8OFaGmrDBjI="
   },
   "1.19.2": {
-    "spigot": "sha256-S6Px6LWUjs7kSqNyAq5gDtNO64/1Mb/r8+ioKJzOljM=",
-    "craftbukkit": "sha256-1iVT4CcSswmkMKJHJvJjuGNqWbmy0HFx+fg7T0BQ9w0=",
+    "spigot": "sha256-JPAj6O0TlaV5qrcVbSCNc0149tCyNA6X75GOZWiAiz8=",
+    "craftbukkit": "sha256-/+qB0cJN/jU53M3ePuUlCuTEDr/Yu9T/iD7O60xB1mU=",
     "spigotApi": "sha256-G58bgAT6/T283JzW3gBGcqy7v+Ji4SSw0HiLrhKpbyA="
   },
   "1.19.1": {
-    "spigot": "sha256-FcVd7agAXk374u9E9CCapSoP5IDOaDojzcutEkwbFWk=",
-    "craftbukkit": "sha256-Ygg5+CLvDkBrICutsjy9+zM2Rwh7hzVGtRHBWz76J+M=",
+    "spigot": "sha256-Go0MMY0O8e1KqXNpHq8RMjQJ3sRb7WUaolJYrDiU40k=",
+    "craftbukkit": "sha256-8/VpbGLglegtiVTsme6LU5dKA/VxT/cWo8q3Jq/3uXc=",
     "spigotApi": "sha256-/jRZvulvK/2eW7757QcB0d84Pc7z/MLWic5xOesVCBo="
   },
   "1.19": {
-    "spigot": "sha256-IwOzd/819D1ukIOtod5nuxz2FmlHXBGAxq9oEaDxNe4=",
-    "craftbukkit": "sha256-dxFQBmk7ikhKf8G9jgayqVDvtzcC3z5zENbqyPTW8IQ=",
+    "spigot": "sha256-KLaj9yXSeZzQAioHGnMgM3Mx6BZ3OlQ5q8fS6GEKWrM=",
+    "craftbukkit": "sha256-6XBKY8T9S5hROe+RQnjI0JRhoQPXbnVEQKGxx98DIhs=",
     "spigotApi": "sha256-HHShhO9ClrEynw3FEGahr8blkxkd/8Om7xzHQ+R3xH0="
   },
   "1.18.2": {
-    "spigot": "sha256-nrm5Ae+Zw5+Rj9Zlo+WIg9TEDQGLE/2cMKmRODCGV6s=",
-    "craftbukkit": "sha256-Y2xlS2QWGyxNpaAH5LfwNd1xvzr+Ecr7olGIiYKu9T8=",
+    "spigot": "sha256-zSbk6OIPUjNB89UYzDngngLwEsPTmZQC+O4jLZHxQNQ=",
+    "craftbukkit": "sha256-jVTd5qeH/XhOIFExtwbQBhtZ3KLs+NdpolGoNWm8l0Q=",
     "spigotApi": "sha256-ObVicsQ22GcVHpa8WPOFkOPoO8StPmHUGywgHWCzlIU="
   },
   "1.18.1": {
-    "spigot": "sha256-IyyfmP0WXiVa6y/rOmu4Lkei5tJqcre74plyduAtvAA=",
-    "craftbukkit": "sha256-a+spIjNEluwEwGFpgmq4l4O9B1s140Vu9k8TzBic2/o=",
+    "spigot": "sha256-vLd1BXClXotNq5Cl6vYyf4FvyphJjZ6O5BHshVRCdFI=",
+    "craftbukkit": "sha256-M60cpSWN/4coNwmbfLZZVN/r2gIcpJTaoQDOXgG9BV0=",
     "spigotApi": "sha256-ykaoM4bgagpGh34lFD4yabG0AmnCDhtwY8CMsfkVVGk="
   },
-  "1.18": {
-    "spigot": "sha256-LZH09KQaoEZ14QYafyTIpiFbbMaABoEzMfK1itHXcg0=",
-    "craftbukkit": "sha256-34vJVER+jZqKneoFN05V5FxbAqZgX48i9dXHxNmfDig=",
-    "spigotApi": "sha256-U67yDVEuRdjk7sm/r4U+OYxmW7CERdqWfCzUyhMfLV0="
-  },
-  "1.18-pre8": {
-    "spigot": "sha256-EzwjWJQgqfGZQqK4bUa8XymST6/zso4l31m0TDxN7Zg=",
-    "craftbukkit": "sha256-Tne/a79Gx92GSIlFTy/3oJGG06jDfytXdB76NMqlSiY=",
-    "spigotApi": "sha256-aMfuLx0WUvx6QL47edsm4E64ktpX5PtK0mbsY9F9B8Q="
+  "1.18-rc3": {
+    "spigot": "sha256-5Bmmuhx8TF52MpKzvLvkcntMicPdIcORS3P89kvINBE=",
+    "craftbukkit": "sha256-zWtItYrUFWM6Bfg4McjN6UnCmF4uH0VdP6N9TzTIlIk=",
+    "spigotApi": "sha256-MmNLqprzu/9m4NsnWVqVt+8Vk0ZEIjAvEsUmCAMOEUI="
   },
   "1.18-pre5": {
-    "spigot": "sha256-Zz6TZU85x9NG2QvUqTySlOlc9EjDL33FH0ba40Ly+Yw=",
-    "craftbukkit": "sha256-+2QB80nwD37LIBmP+UMK5Z4I5FMIOlbm52QDUNpJomw=",
+    "spigot": "sha256-lEEwhL8WO31EwywvgokLhNMctDeZeZVb678gLuNGgO4=",
+    "craftbukkit": "sha256-sbyOWcYxYLbafYu0FHgYuHgpO77+ks1KCfFRJanykGo=",
     "spigotApi": "sha256-JsvKrydXNaWiqDgmZUhQWBUzgT5Pbd9SvpISXFayJT0="
   },
-  "1.18-rc3": {
-    "spigot": "sha256-pt7lmmTk9c9lnu004XV7jm+n2tXKJyKsLLYKTTFSmZc=",
-    "craftbukkit": "sha256-zpc3nt7zFbMSzMXF7jKII1+d/Vp4J7fXF4ZkLiqy0zg=",
-    "spigotApi": "sha256-MmNLqprzu/9m4NsnWVqVt+8Vk0ZEIjAvEsUmCAMOEUI="
+  "1.18-pre8": {
+    "spigot": "sha256-XZHwqm9A37SZb2mzUQUsjzLiy9lpiGj95c9nWioGEyo=",
+    "craftbukkit": "sha256-HE8A6Sc3j+U6/LqJWErBn6tyGuDyUzFCAfnmkbz+Rmg=",
+    "spigotApi": "sha256-aMfuLx0WUvx6QL47edsm4E64ktpX5PtK0mbsY9F9B8Q="
+  },
+  "1.18": {
+    "spigot": "sha256-IIgOieuk5fVVEsnWY54f/mRRvQePwWzzMEcOoE82sEk=",
+    "craftbukkit": "sha256-g7V9wEuiLapt+2duRftav4oPeWchx3q9DH4EebOV6P4=",
+    "spigotApi": "sha256-U67yDVEuRdjk7sm/r4U+OYxmW7CERdqWfCzUyhMfLV0="
   },
   "1.17.1": {
     "spigot": "sha256-Y/AeuGUaeg1A0SVXoSd5yoBhV6u1ZgYxrhaoBv7AeRY=",
@@ -165,128 +165,128 @@
     "spigotApi": "sha256-r6ZvXXRHx2z7gjn4DVpO9r4FsGFIOaBs55gJ/nEeZPM="
   },
   "1.15.1": {
-    "spigot": "sha256-Xm2jGMXEmb+yvGfEnb6n1pnI9dKwoNIyVzFnz58RP5w=",
-    "craftbukkit": "sha256-xB/l72LpJ7+Ha0ZYxKMXMPkLQYl9f/Mw9Uti8E7wI80=",
-    "spigotApi": "sha256-GfK1rzzeQz18RkpteUQ69j7XkrUdhNQf4P91MvN8VnA="
+    "spigot": "sha256-x21T7jUZko9ntqUnCuxa5cxF7gHrxsQpsrtwwN5naSU=",
+    "craftbukkit": "sha256-1RO3NRPU2jfkDQ7EezAi+TJuUuu1mtoylq5tb7/yZoo=",
+    "spigotApi": "sha256-7KPFivdfM6FlNgpRUGsdrk66NWyqJXTPtKVCCwNAzuI="
   },
   "1.15": {
-    "spigot": "sha256-UCK1Aj2v551ei3GGB2/C0mFBtSQ31gBM5Sa0JZyhDJw=",
-    "craftbukkit": "sha256-5r1mnOC65k8aD98fko+qbsHn4Lmwap83/2vfckkb0uE=",
-    "spigotApi": "sha256-pEqAgBWNWOR2ga3v+NEzQUVrwhJWXe8DksRrafczc2w="
+    "spigot": "sha256-nAvHuK+8or6t6Q/KDF9Xgcgp96rXDnojxvAqgmoD/1A=",
+    "craftbukkit": "sha256-eCn6AADgN7nVz6c+ofeS8wxyacnycrIYU0QNVGlGpdE=",
+    "spigotApi": "sha256-dkvf4WjRzssOuq0kCYNPtfG/tKLhiwd0TzOOSmX0X+8="
   },
   "1.14.4": {
-    "spigot": "sha256-jFaYOeax7ILkE0+RQ/rzPjhqFS3HnASaXiseG7Selik=",
-    "craftbukkit": "sha256-rYKUq+4H95uy8JqFchn7wOIzh4ZbAzJFf2n1p2m4ueU=",
-    "spigotApi": "sha256-x0cq1CFrjmnkv3Ziz1Nac+hC/5pd4GnKD/1I3IUOIPc="
-  },
-  "1.14.3-pre4": {
-    "spigot": "sha256-HeQUvQZ4Fwa1WlHBXRtUNFloLc8GM6mzD1n1S/rrMtU=",
-    "craftbukkit": "sha256-wjgxAtLGdOOH1Jfl2OTFdfwZcUn5EX+zQ5B4x0v/qcE=",
-    "spigotApi": "sha256-h4qS6Kw5XJodmHL0ZEvPNNW2tjs9vASN2x2TijF1EsQ="
+    "spigot": "sha256-uc78CubYdK3YrKHuB1CXvmyVs2DYsXnk+EMhv9JMiOA=",
+    "craftbukkit": "sha256-RearjZTgaeIlyUC5w14vNmAZIa9GUzor9aQoR5W8yQY=",
+    "spigotApi": "sha256-LY1BZyALvJu76WjwUOSHRRuEcP6RH+XI71A83B5EcB8="
   },
   "1.14.3": {
-    "spigot": "sha256-X3l5XZWEkmCGRbG6d5qRpQB3tLerTKIyY6ZVrRySc/U=",
-    "craftbukkit": "sha256-zWQCCrC1z0udBUzA/6Azd7HtR9r43Pl7nGxATpDRzZg=",
-    "spigotApi": "sha256-EpBSjhibKZOYdptztv23BgsKGbAVRoqUOjO2C1aFH+k="
+    "spigot": "sha256-XOf+SeLuEHd+oHIoAar7kwlB1jEwyNUwQyutRmZ5p6M=",
+    "craftbukkit": "sha256-JMV0eu/raVa10rToWGHgNhZNC4WlGNwmdFArIHKHDnU=",
+    "spigotApi": "sha256-iklFiVHR0dJLnGdSvPmzXm17oyOrffAHIII9oB2vYUc="
+  },
+  "1.14.3-pre4": {
+    "spigot": "sha256-R++HD8bwlaXn8u/GAJ9zhLkbJQiTm6TudJzb63V1XAY=",
+    "craftbukkit": "sha256-uzv/HLV3WZjVTLLalo4N6c48mR9Q7MoxswoS+vcDi80=",
+    "spigotApi": "sha256-uRlaj9VL8TWvaZK9q0jYJIbKawmO4caGxqGtoR4czL4="
   },
   "1.14.2": {
-    "spigot": "sha256-PjQ8pG2dX3ud4Ci52Pfta7fob1YBgfKRDXoozs3o/Pc=",
-    "craftbukkit": "sha256-XHL8jrabNA3GAXfSH62ZO2Ct6KeBfq5jAx/k/diNwwY=",
-    "spigotApi": "sha256-G/mVu46II2EpPRKCad5bDjKA6SIysiu1Sb6rno8SeIg="
+    "spigot": "sha256-wtR/RTxvWbJ8gSv9+2rgNjbDi8pJ7IRqBcOL2dVuXZ4=",
+    "craftbukkit": "sha256-wOkUqZN0ppSHgOa+70ENAtmmDivINSga2fprcfJJyY0=",
+    "spigotApi": "sha256-Ha+JTofSUaRQCUbk+yqWoRSakviSkHQg+G6BynafQk4="
   },
   "1.14.1": {
-    "spigot": "sha256-o3VdGEMOK3PygKJPak/w3mNUqGin5R9RhnaRIPVTJ6M=",
-    "craftbukkit": "sha256-UZcFwtuJq89oAkGAdYM+F7xjVoFuMFHXoIT7c+iXeU4=",
-    "spigotApi": "sha256-pbdx508hTbyz3opIAIn0fV8sQdVa+yDZVSv2mCzq/a4="
-  },
-  "1.14-pre5": {
-    "spigot": "sha256-otQqEWUEieTSV8RXmZOk4+C7NuPkYMoJDGWFUjTwRY8=",
-    "craftbukkit": "sha256-w1ZYcGoE2pnAH8s8nMXPApYO22PK7TrXvzh9wkj0YOg=",
-    "spigotApi": "sha256-F0qsSpmDpLgiFq1VJTYeIox1Q9P7TrISLQKKi3ssdrg="
+    "spigot": "sha256-9dhGCA9TFH9fRJNtP4W4Wpy+ovDD/mcrDdq9xbbAQHM=",
+    "craftbukkit": "sha256-SDV98qSGcmiLS19hwKpEcV576+DNx6UXdbf3rZXWv2U=",
+    "spigotApi": "sha256-LxvkvsqiBOJxVIHbYl8Ub//Fr0S6o89V8NSHJA+3N44="
   },
   "1.14": {
-    "spigot": "sha256-l4EDd93ctTSNoc7eqW3MhKuRkN09vrmNwsBqrqeg5po=",
-    "craftbukkit": "sha256-lUg7zetUu8lqbBfr60+mu0j15hz70tu3ubFQ8g2qmr0=",
-    "spigotApi": "sha256-f+t3qT2pC4XkdeSK6j2//nOsFLioWIeE1awqUeTndjo="
+    "spigot": "sha256-vwxYDv5TLXiD4PFgdIssRJOEdsXjlA3BpwVO5OsWtMg=",
+    "craftbukkit": "sha256-kZ3SoiaUzQhyoX4wiEKvQFWFSzTKH2KUMSgiZwg+KZw=",
+    "spigotApi": "sha256-5qdVkkNvzwzxHfIuRDaXCKkdJucDZ5ivYUn0lVBUiz0="
+  },
+  "1.14-pre5": {
+    "spigot": "sha256-lIyqqDym2mEfvldZTePGkUYz7yGZDaoGu1v0iErm7t8=",
+    "craftbukkit": "sha256-+hAQVCU7HE2C+h/VfTm7jPGjev1d0LBJaSO1hIX2Q9g=",
+    "spigotApi": "sha256-TzE21r5iNTY2Vn8IWMspxB3OBU/uoGlYarRuIfXjk04="
   },
   "1.13.2": {
-    "spigot": "sha256-OB7jX0M0jy+DTrp58ZVy2AHOspVnlN/l/irqsGKM8lY=",
-    "craftbukkit": "sha256-vIGiMnivsMcPTpYWXWX/2d37YYIKOIBFLDHsdGAhaQA=",
-    "spigotApi": "sha256-f5XVUPeSnqNqRzvxwU48PdZgcxPXwqQBKj+RRhLA2SI="
+    "spigot": "sha256-TIgeM2fp+89RyQK4nVb7ZDzR/1PP/qbCeHKXWmalYJw=",
+    "craftbukkit": "sha256-y6cO5ALWdsV5InurI77lJfXDHGE3QztpNmaMmQ9tJPY=",
+    "spigotApi": "sha256-58/7Zsv/DEep1fSuMU91lqtG/2JX6xYHEO2o6uTITzA="
   },
   "1.13.1": {
-    "spigot": "sha256-Q+wpfRqLPgVBxnyrPoOjt6ZEH/By1VtZWbjzJVlWjp8=",
-    "craftbukkit": "sha256-pcXVSQ1x9xurmy9meCWuLJkIYURt/WSNsu7s+geUHfE=",
-    "spigotApi": "sha256-q+NwRCbB2lkt/DIFSB+Qqe+ed6Qo/Z423s/FRzFLTvw="
-  },
-  "1.13-pre7": {
-    "spigot": "sha256-zJzs9kmRmwQ4x33DnNH5Av8bjjHeRguBaXeZ2NApJZ0=",
-    "craftbukkit": "sha256-mbebznKepo/nQ3VxODUD9z+OFBE4S/t2GSk4ey4T4dQ=",
-    "spigotApi": "sha256-tu+eZLtaQHh7h5Fwup7tXMBxKWu29BcRxYJqtFM5M8s="
+    "spigot": "sha256-6xNMiyQzkB+pL3KPpXXNMkN04Y+IMR2j6Pwgr7rDd9c=",
+    "craftbukkit": "sha256-DDKf6o0LZTy2PCwhdXvhfRLWczPMk/y2yYAizHvvwuA=",
+    "spigotApi": "sha256-h3MUyRpB7QvPQQ25IVO6a/rXR3P2tMgMugiIvXEEiCY="
   },
   "1.13": {
-    "spigot": "sha256-weJaet+TpFkY0PCkR622iPvszIdWLc4iJ+tEdNO4vR0=",
-    "craftbukkit": "sha256-4vzBP/Ald6SXqRKLy14o+a6WvKsOZaApo80NBhL3dm0=",
-    "spigotApi": "sha256-ak5OhT4HxZ83E3aWfocgtNKiTHpkVxyxkcjfxnCShBI="
+    "spigot": "sha256-kS8PkBihCZwKSH/u7IqAwkGbjP6XW3bsV1GUVV+x+Qs=",
+    "craftbukkit": "sha256-weid86OzIt3fgTZLn2gOkZh/0zZatOatspTez71X2FE=",
+    "spigotApi": "sha256-L6S3ba9f48mSbbFmnQc71wm8qiJY0S3jiqtzFY7WlAE="
+  },
+  "1.13-pre7": {
+    "spigot": "sha256-hr0+ngIhFvWW5hmi7fCP0gHzBSA1YZr7GT/ULgSqpLM=",
+    "craftbukkit": "sha256-+uuh7RcglBHbVXQwl5/RTQIo2H8Krayf9QUcuQSKpxE=",
+    "spigotApi": "sha256-tu+eZLtaQHh7h5Fwup7tXMBxKWu29BcRxYJqtFM5M8s="
   },
   "1.12.2": {
-    "spigot": "sha256-Cnunnf93lt68ocl1TI++PhiWZttNxjl5GKntv1UkwnY=",
-    "craftbukkit": "sha256-OdVSQJrFuoLBJGNUoc4kKt5EcP9g6YwSPMCSyAmp680=",
+    "spigot": "sha256-djK9+aruWgeG1AhBGQp6XcuBgRmwacXCgMljTyaQ0kw=",
+    "craftbukkit": "sha256-WAjb5G0RTETjvs5JrZXj6f/qNnF3M05jZxaElAsVRBc=",
     "spigotApi": "sha256-MC6RsQyHYITVVdj2LwwMgcQxHxWbQ79I7T8FDD4s9J0="
   },
   "1.12.1": {
-    "spigot": "sha256-SnT91QCHmOeJuAehZ7AgHUIWwGAX/c8J14oUEbAXQCA=",
-    "craftbukkit": "sha256-W00zpLVSOlw93wM6oIspTxMv6BtfCiX8iF28sn5sUZE=",
+    "spigot": "sha256-7mZAFlg89DQGMZe53ykRUtz2054zJMTslX6aW2YHzUc=",
+    "craftbukkit": "sha256-n8kgPP5Z5316/9ziMlsrE6XWcM7NJXjXLDr/of7+5zg=",
     "spigotApi": "sha256-54wedATJ4tmS66aHXq2piDLbTvHCfqcUVQ/C6CvFkLU="
   },
   "1.12": {
-    "spigot": "sha256-uPr5zHpraH0QrrXF5XpYeNkcnGcjfqWYY4b9JSoN4+I=",
-    "craftbukkit": "sha256-zHdHuFBO4L9nA0DeUuVx+/jeJu9WO2cvU/vKnSbVobE=",
+    "spigot": "sha256-DOkvAyB/FvJdSLyA+S1giKeIponJ0Bw037P/8oBPwlQ=",
+    "craftbukkit": "sha256-5iY9CNYT7CULbWU4M279D9DHyG+W5J4zwh3dzhwlZB4=",
     "spigotApi": "sha256-3wnPEyg934GFskaSVsnaK29qlroOOOnWIJIL4/jIw2s="
   },
   "1.11.2": {
-    "spigot": "sha256-MzPgBpaetXrXNM+K5+1mVuXRGAtyX3jwPhLdWGDm9q4=",
-    "craftbukkit": "sha256-REq8R3uoZM6h904xnSdiQuvhoWcDyTUVxnzj4QiJKrE=",
+    "spigot": "sha256-bPijda/Xotv0LChxfWxHVSyL+P/e04PKFMQMaIceYWg=",
+    "craftbukkit": "sha256-UMIw/XSBNjJ1niLWA49m6cT6G2sqO4EeU+GVowjTprQ=",
     "spigotApi": "sha256-8/2XiW1hkuqAeGgIwtXVyTxkLmlUyKNOtRYR+Tz/JCA="
   },
   "1.11": {
-    "spigot": "sha256-PCdsvKlKDEE58C8KhLp+8XBc3QBrTNu7Yp29PjOubNw=",
-    "craftbukkit": "sha256-clHQCalHf89pfMMxlgHCrbutYtU1E9U88dUScDWb0Sc=",
+    "spigot": "sha256-ixhK1WshftTxYIJqkhsnxZxTiFMPHUVA6qeVwLChZBM=",
+    "craftbukkit": "sha256-i/PzmbMtV6G0TOBv5j5NCKdtW8Ho7daPBqfKYAOjfXo=",
     "spigotApi": "sha256-gwU9xDEGjTtIk7JJgnetw3a7JA9XhqMw68jmtCWFUD4="
   },
   "1.10.2": {
-    "spigot": "sha256-d9moyj0MXakM0UK7HaUZ33QcbkLSowiBPXA1e0AjppU=",
-    "craftbukkit": "sha256-MLtWnen1OE7gXVSSs7mKaZtImtshPiytpl2PV0pa3j0=",
+    "spigot": "sha256-Nxl7aZNnl5YlTzsp8K6X8d8ItpzyHQ+2ija/pXudNCc=",
+    "craftbukkit": "sha256-QohfDrZ4zKv8+O//DObBh/5SpIc0NelAqZ1HFwCyfzw=",
     "spigotApi": "sha256-umSuduKYNTmxFW6mV+KKTHw0AO0Y+4a5427GNLmGWHs="
   },
   "1.9.4": {
-    "spigot": "sha256-8syeE4SqAfg9YO/MtoUgm8HGwdFynpbPWxr5mQ8TxeM=",
-    "craftbukkit": "sha256-dCjXqFpT5nLt9ZL+sXQBEOqUupBLvY7mjWUAJRVwHPM=",
+    "spigot": "sha256-RZ6ly1GnI8FR0IValqxENoLvt44uVVjdaP0/Af43hww=",
+    "craftbukkit": "sha256-/E4mGD+Qc1jbhciF/VswQfofbc+m4c25tTRfs8faFgw=",
     "spigotApi": "sha256-cURO5kABmcaz6/82Gb+kVpdFDPDi9BFzpApPiHPag6g="
   },
   "1.9.2": {
-    "spigot": "sha256-OZjQx/zsOFw841oqHPe0Z2vPKHvAQuJJ8xaRgcRa3Fk=",
-    "craftbukkit": "sha256-xoemoMr63wGM5QxjxT/iIMKwfkt0LV0cJOrEfj7yHxg=",
+    "spigot": "sha256-p0mB8W3VZp9F3o2IQX2J8MMtM7F2WFbeTPktnor2vLQ=",
+    "craftbukkit": "sha256-RvXo/BKnaCXJD/D2DetYtNzDH4hTcEAaZE8xIwUUZI8=",
     "spigotApi": "sha256-QhEVifjS8dQyPO7yig1KB2bzKt6rEQR/02uEIJMUZJ0="
   },
   "1.9": {
-    "spigot": "sha256-7DR06X29yC0mjBcjQjWCnaFVgDVGQVQyzFkbnsOW9GA=",
-    "craftbukkit": "sha256-b2fKLTJxjaS2vyAHTjJ/KRki/yWbkooTU68Tg6A1eRg=",
+    "spigot": "sha256-KRU0VfjKO80tPkv/lJw7kPpChLyTlIVHGY0VCcsWWIQ=",
+    "craftbukkit": "sha256-IAb5oVQkp5JX6Ch/ytoLW9lyGcOazikcFafxf0qaCpE=",
     "spigotApi": "sha256-43SisIm2AGCzjLnIbrq12s2O76I725Lyo1R+fNorYb0="
   },
   "1.8.8": {
-    "spigot": "sha256-qREdq16+H8IiaP8Ot93iHnP2RxPH8MTifr1wa3imQOo=",
-    "craftbukkit": "sha256-JiLXAj8ATR6DimEEeqCvZ9SRF+V1aT0gHHINhs8eBmA=",
+    "spigot": "sha256-MvwuQ3JCOIOXeF6/zfoXWzczMoOyzqI72bjreH3b7J8=",
+    "craftbukkit": "sha256-zYdKGHSoj9HKOSUAZsAEXQ3mgFJUd8TVs29CFjo6N68=",
     "spigotApi": "sha256-LU9X+bvF7QRS+/wce9lZ6toA2FNtwC4kRidVbyiuiMI="
   },
   "1.8.3": {
-    "spigot": "sha256-pO0Tn27X1kMZ5rdNWcrvAQdoy8CFJuP/dSyh2oxbYMM=",
-    "craftbukkit": "sha256-E41D8cpbB+ZwHH4R3lgQF/Bm9cZXgOO3fTIeKZt3Tqs=",
+    "spigot": "sha256-6ZCx02jfqpwaPznweOesk4Uai4nHnSF5Lby03A8/lKE=",
+    "craftbukkit": "sha256-stWHiuTn6BFsEu58bxhI9l2leIBPtXrBLtQ4RtDjBVQ=",
     "spigotApi": "sha256-tsqAK4hwk2Ssj12X03uN7IoxloD0Jjjv1DEn8NXpASw="
   },
   "1.8": {
-    "spigot": "sha256-SXcUT2VwEUpETutG45CMFDc3QDiuosKDk9birNexSsg=",
-    "craftbukkit": "sha256-ajLMj3R7/jWziut9Ib+BYLxHxt9WN0HEwWG/2rzTMbY=",
+    "spigot": "sha256-PKVn4K6JSQa04Ivz2laOa9NThbq0XDe/tDYsTJ3ZefI=",
+    "craftbukkit": "sha256-CW6D8PwsKezTQv7u+hDule0V4GBTjFT/WW0H4l3GA+E=",
     "spigotApi": "sha256-NqW6Y3pXWN7WWj/KeybXuYnkW2GU41fRV51J38NJ+t4="
   }
 }
