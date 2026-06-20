@@ -27,6 +27,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # Pushes the bump to master, which a repository ruleset gates behind a
+          # PR + CodeQL. Authenticate as the GH_PAT user (on the bypass list) so the
+          # push lands. Schedule/dispatch only (no PR), so requiring GH_PAT is safe.
+          token: ${{ secrets.GH_PAT }}
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31

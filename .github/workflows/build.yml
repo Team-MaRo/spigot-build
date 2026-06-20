@@ -42,6 +42,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # The keepalive step below pushes to master (ruleset-gated). On the weekly
+          # schedule, authenticate as the GH_PAT bypass user so that push clears the
+          # ruleset; on every other event — including PRs, where GH_PAT is absent —
+          # fall back to the default token so checkout still works.
+          token: ${{ (github.event_name == 'schedule' && secrets.GH_PAT) || github.token }}
 
       - name: Configure git
         run: |
@@ -99,7 +105,8 @@ jobs:
       # activity. In a long quiet stretch (no new Minecraft versions → no
       # versions.json commits) this schedule could be disabled. If master's tip is
       # older than the threshold, push one empty commit to re-arm it. Schedule-only
-      # (a manual run is itself activity); GITHUB_TOKEN push won't loop-trigger.
+      # (a manual run is itself activity). The checkout above is GH_PAT-authed on
+      # schedule so this push clears the master ruleset; no push trigger → no loop.
       - name: Keepalive (prevent workflow auto-disable)
         if: always() && github.event_name == 'schedule'
         env:
@@ -336,6 +343,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # This job commits versions.json to master, which a repository ruleset
+          # gates behind a PR + CodeQL. Authenticate as the GH_PAT user (on the
+          # ruleset's bypass list) so the direct push lands. No loop risk — this
+          # workflow has no push trigger — and the job never runs on PRs (see the
+          # job `if:`), so requiring GH_PAT here can't break fork/dependabot runs.
+          token: ${{ secrets.GH_PAT }}
 
       - name: Configure git
         run: |
