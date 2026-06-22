@@ -52,7 +52,7 @@
       # moment SpigotMC publishes a new build). Kept current by
       # .github/workflows/bump-buildtools.yml (probes lastSuccessfulBuild, bumps
       # both values). The two lines below are the bump script's sed anchors.
-      buildToolsBuild = "4630";
+      buildToolsBuild = "200";
       buildToolsHash = "sha256-th+pAVj1lO6VvqGic5nrZNQ5tMiuk0W9RHagLOSbBv8=";
 
       # Reproducible-from-source build (optional path, e.g. for docker-spigot-modded
