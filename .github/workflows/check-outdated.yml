@@ -60,15 +60,20 @@ jobs:
           distribution: temurin
           java-version: ${{ steps.prep.outputs.java }}
 
-      # Build the StopOnStart plugin against the release jar (which bundles the
-      # Bukkit API). --release 8 keeps the bytecode loadable by any server JVM.
+      # Download the server jar (booted below) and compile the StopOnStart plugin
+      # against spigot-api.jar — NOT spigot.jar. Since MC 1.18 the server jar is a
+      # bootstrap/bundler: org.bukkit lives under META-INF/versions/ and is extracted
+      # at runtime, so it's invisible to javac's classpath. spigot-api.jar is the
+      # plain Bukkit API and is published alongside spigot.jar. --release 8 keeps the
+      # bytecode loadable by any server JVM.
       - name: Download jar and build plugin
         if: steps.release.outputs.exists == '1'
         run: |
           set -euo pipefail
-          curl -fsSL -o spigot.jar \
-            "https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.version }}/spigot.jar"
-          javac --release 8 -cp spigot.jar -d plugin-build .github/check-outdated/StopOnStart.java
+          base="https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.version }}"
+          curl -fsSL -o spigot.jar "$base/spigot.jar"
+          curl -fsSL -o spigot-api.jar "$base/spigot-api.jar"
+          javac --release 8 -cp spigot-api.jar -d plugin-build .github/check-outdated/StopOnStart.java
           cp .github/check-outdated/plugin.yml plugin-build/
           jar cf StopOnStart.jar -C plugin-build .
 

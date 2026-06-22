@@ -374,9 +374,16 @@ jobs:
           # Deep-merge existing versions.json with every per-version record (later
           # wins), then pretty-print sorted newest → oldest by semver. Strip any
           # "-preN"/"-rcN" suffix before the numeric sort so pre-release keys don't
-          # break tonumber (they group next to their release).
+          # break tonumber (they group next to their release). The numeric tuple
+          # alone TIES every pre-release of an x.y.z with its release, and `reverse`
+          # then flips tied runs unpredictably (input-order dependent → cosmetic
+          # churn). The secondary key pins that order: "~" sentinel for the bare
+          # release sorts it above its pre-releases (ascending), so after `reverse`
+          # the final release leads its group, deterministically.
           jq -s 'reduce .[] as $o ({}; . * $o)
-                 | to_entries | sort_by(.key | split("-")[0] | split(".") | map(tonumber)) | reverse | from_entries' \
+                 | to_entries
+                 | sort_by([ (.key | split("-")[0] | split(".") | map(tonumber)), (.key | split("-")[1] // "~") ])
+                 | reverse | from_entries' \
             versions.json "${records[@]}" > versions.json.tmp
           mv versions.json.tmp versions.json
           cat versions.json
