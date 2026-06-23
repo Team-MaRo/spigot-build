@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Pushes the bump to master, which a repository ruleset gates behind a
           # PR + CodeQL. Authenticate as the GH_PAT user (on the bypass list) so the

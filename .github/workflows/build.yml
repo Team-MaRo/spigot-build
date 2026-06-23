@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # The keepalive step below pushes to master (ruleset-gated). On the weekly
           # schedule, authenticate as the GH_PAT bypass user so that push clears the
@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -342,7 +342,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # This job commits versions.json to master, which a repository ruleset
           # gates behind a PR + CodeQL. Authenticate as the GH_PAT user (on the
