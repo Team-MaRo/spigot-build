@@ -3,7 +3,7 @@ name: Build & release jars
 on:
   # Pick up new Minecraft versions automatically and rebuild the newest ones.
   schedule:
-    - cron: '30 9 * * 1' # Mondays 09:30 UTC
+    - cron: '30 9 * * *' # Daily 09:30 UTC
 
   # Manual builds.
   workflow_dispatch:
@@ -389,12 +389,29 @@ jobs:
           cat versions.json
 
       - name: Commit if changed
+        id: commit
         run: |
           set -euo pipefail
           if git diff --quiet -- versions.json; then
             echo "versions.json unchanged"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git add versions.json
           git commit -m "chore: update jar hashes"
           git push origin HEAD:master
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # New/updated jars are now on master. Tell docker-spigot to repin its
+      # flake.lock to them (refresh-jars.yml), which then rebuilds the images —
+      # so the jar build is always finished before the image build. Needs GH_PAT
+      # (cross-repo repository_dispatch). Only when hashes actually changed.
+      - name: Notify docker-spigot (jars published)
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          set -euo pipefail
+          gh api repos/Team-MaRo/docker-spigot/dispatches \
+            -f event_type=jars-published
+

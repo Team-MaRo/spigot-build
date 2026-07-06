@@ -9,7 +9,7 @@ name: Bump BuildTools pin
 
 on:
   schedule:
-    - cron: '0 9 * * 1' # Mondays 09:00 UTC (before the 09:30 build/check)
+    - cron: '0 9 * * *' # Daily 09:00 UTC (before the 09:30 build/check)
   workflow_dispatch:
 
 permissions:

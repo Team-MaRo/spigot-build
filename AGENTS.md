@@ -33,10 +33,14 @@ A reproducible **from-source** build is also available for those who want it.
   - `record-hashes` job — single job (no write race) that merges the hash
     artifacts into **`versions.json`** and commits it to `master`. This is what
     keeps the pinned hashes current; consumers pick them up with `nix flake update`.
+    When the commit actually changes hashes, it then **`repository_dispatch`es
+    docker-spigot** (`jars-published`, via `GH_PAT`) so it repins + rebuilds its
+    images against the just-published jars — the jars are always done first.
+  - Runs on a **daily** schedule (09:30 UTC).
   - keepalive (in the `matrix` job, schedule-only) — pushes an empty commit if
     `master` is idle past the threshold, so GitHub doesn't auto-disable the
     schedules. One keepalive re-arms every scheduled workflow in the repo.
-- **`.github/workflows/check-outdated.yml`** — weekly watchdog: downloads the
+- **`.github/workflows/check-outdated.yml`** — daily watchdog (10:00 UTC): downloads the
   newest version's released `spigot.jar` and boots it (with the **StopOnStart**
   plugin); if the release is missing, the jar is broken, or Spigot prints the
   "outdated" banner, it dispatches `build.yml` to rebuild. (The build keeps jars
@@ -44,7 +48,7 @@ A reproducible **from-source** build is also available for those who want it.
 - **`.github/check-outdated/StopOnStart.java` + `plugin.yml`** — tiny Bukkit plugin
   (`onEnable()` → `getServer().shutdown()`) used by the watchdog to stop the bare
   server right after it boots.
-- **`.github/workflows/bump-buildtools.yml`** — weekly: keeps the BuildTools pin
+- **`.github/workflows/bump-buildtools.yml`** — daily (09:00 UTC, before the build): keeps the BuildTools pin
   in `flake.nix` (`buildToolsBuild` + `buildToolsHash`, used by `lib.buildSpigot`)
   current. Probes `lastSuccessfulBuild`; if newer than the pinned build NUMBER,
   fetches that build's hash and commits the bump (sed anchors on those two lines).

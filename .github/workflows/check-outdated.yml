@@ -1,13 +1,13 @@
 name: Check outdated jars
 
-# Weekly watchdog over the newest buildable version's jar. The weekly build keeps
+# Daily watchdog over the newest buildable version's jar. The daily build keeps
 # jars fresh, but a build succeeding doesn't prove the jar actually boots or isn't
 # reporting itself outdated. This downloads the released spigot.jar and runs it
 # through a real startup; if the release is missing, the jar is broken, or Spigot
 # prints the "outdated" banner, it dispatches build.yml to rebuild that version.
 on:
   schedule:
-    - cron: '30 9 * * 1' # Mondays 09:30 UTC
+    - cron: '0 10 * * *' # Daily 10:00 UTC (after the 09:30 build)
 
   workflow_dispatch:
 
