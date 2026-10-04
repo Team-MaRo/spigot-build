@@ -1,8 +1,8 @@
 {
   "26.3": {
-    "spigot": "sha256-cj9SjSc1RKJsiUipHd9p8ujTncJcRwq4onZOoGLq9Lo=",
-    "craftbukkit": "sha256-lxp6+Kqsvjvu1AjYH4FPTiBKMquWSDBubcOGz0STieg=",
-    "spigotApi": "sha256-vT0UoNKMGDJR/5LNnYmylen7DYQFBtcDtmkllWrHRmc="
+    "spigot": "sha256-snHEvTA2V7eKQV8pf0F8t3lkvj+S7jwbq2iD9C7qJOA=",
+    "craftbukkit": "sha256-gD0GRKDLMohYWBYuBLK1xEjSO+zoEcvDeeFq0fwGs3E=",
+    "spigotApi": "sha256-gkxYJ1ZuJ3hyeJJUNMhydUZ4A9TRkAfPexhw6WE4YyQ="
   },
   "26.2": {
     "spigot": "sha256-+3qhkpwWlu2OCJmlyWlLWmcUDuxQgvyTo7obOjSxFiI=",
